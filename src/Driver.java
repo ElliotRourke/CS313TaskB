@@ -18,8 +18,19 @@ public class Driver{
         Thread[] threads = new Thread[threadCount];
 
         allThreadGroups[0].enumerate(threads);
-
         System.out.println(Arrays.toString(threads));
+
+        for(int i = 0; i < threads.length ; i++){
+            System.out.println("\n********** START ************");
+            System.out.println("Name : " + threads[i].getName());
+            System.out.println("ID : " + threads[i].getId());
+            System.out.println("State : " + threads[i].getState());
+            System.out.println("Priority : " + threads[i].getPriority());
+            System.out.println("Is Daemon : " + threads[i].isDaemon());
+            System.out.println("********** END ************\n");
+
+        }
+
     }
 
 
@@ -27,8 +38,8 @@ public class Driver{
         currentThreadGroup = new ThreadGroup("Elliot");
         currentThreadGroup1 = new ThreadGroup("Ciaran");
 
-        thread = new Thread(currentThreadGroup, "thread1");
-        ciaransThread = new Thread(currentThreadGroup1,"thread2");
+        thread = new Thread(currentThreadGroup, "ElliotThread");
+        ciaransThread = new Thread(currentThreadGroup1,"CiaranThread");
 
         thread.start();
         ciaransThread.start();
