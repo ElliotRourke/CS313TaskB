@@ -82,7 +82,6 @@ public class GUI {
         mainFrame.add(searchPanel,BorderLayout.SOUTH);
 
         while(true){
-            new TestDriveSeven();
             JPanel tempPanel = refresh();
             mainPanel.add(tempPanel, BorderLayout.SOUTH);
             mainFrame.setVisible(true);
@@ -95,17 +94,16 @@ public class GUI {
             td.getAllThreads();
             mainPanel.remove(tempPanel);
         }
-
-
-
     }
 
     private JPanel refresh(){
         JPanel tablePanel = new JPanel();
         JScrollPane scrollPane;
         if(!isSearch || textFilter.getText().equals("")){
+            new TestDriveSeven();
             scrollPane = new JScrollPane(new GuiTableController(td).buildTable());
         }else{
+            new TestDriveSeven();
             scrollPane = new JScrollPane(new GuiTableController(td).buildTable(textFilter.getText()));
         }
         tablePanel.add(scrollPane);

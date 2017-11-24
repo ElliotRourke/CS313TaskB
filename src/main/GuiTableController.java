@@ -16,13 +16,17 @@ public class GuiTableController extends JTable {
 
     public JTable buildTable(){
         Object data[][] = new Object[td.getAllThreads().length][6];
-        for (int i = 0; i < td.getAllThreads().length; i++) {
-            data[i][0] = td.getAllThreads()[i].getName();
-            data[i][1] = td.getAllThreads()[i].getId();
-            data[i][2] = td.getAllThreads()[i].getState();
-            data[i][3] = td.getAllThreads()[i].getPriority();
-            data[i][4] = td.getAllThreads()[i].isDaemon();
-            data[i][5] = td.getAllThreads()[i].getThreadGroup().getName();
+        try{
+            for (int i = 0; i < td.getAllThreads().length; i++) {
+                data[i][0] = td.getAllThreads()[i].getName();
+                data[i][1] = td.getAllThreads()[i].getId();
+                data[i][2] = td.getAllThreads()[i].getState();
+                data[i][3] = td.getAllThreads()[i].getPriority();
+                data[i][4] = td.getAllThreads()[i].isDaemon();
+                data[i][5] = td.getAllThreads()[i].getThreadGroup().getName();
+            }
+        }catch(NullPointerException e){
+            return buildTable();
         }
 
         JTable table = new JTable(data,columnNames);
