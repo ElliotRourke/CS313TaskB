@@ -1,17 +1,18 @@
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.*;
+import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 
 public class GuiDriver{
 
     private ThreadDriver td;
-    private JFrame frame;
-    private JScrollPane scrollPane;
-    private JPanel panel;
-    private JTable table;
-    private JButton addThreadButton;
+    private JTextField textFilter = new JTextField();
+    private boolean isSearching = false;
 
     public GuiDriver(){
         Thread root = new Thread("dog");
@@ -24,73 +25,98 @@ public class GuiDriver{
         }
     }
 
-    public void displayThreadInfo() throws InterruptedException {
-        for (int i = 0; i < td.getThreadArray().length; i++) {
-            System.out.println("\n********** START ************");
-            System.out.println("Name : " + td.getThreadArray()[i].getName());
-            System.out.println("ID : " + td.getThreadArray()[i].getId());
-            System.out.println("Thread Group : " + td.getThreadArray()[i].getThreadGroup().getName());
-            System.out.println("State : " + td.getThreadArray()[i].getState());
-            System.out.println("Priority : " + td.getThreadArray()[i].getPriority());
-            System.out.println("Is Daemon : " + td.getThreadArray()[i].isDaemon());
-            System.out.println("********** END ************\n");
-        }
-    }
+    private void GUI() throws InterruptedException {
+        JFrame mainFrame = new JFrame("JVM Thread Viewer");
+        mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-    public void GUI() throws InterruptedException {
-        frame = new JFrame("JVM Thread Viewer");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, FlowLayout.CENTER));
+
+
+        textFilter.setPreferredSize(new Dimension(120,20));
+
+        JTextField textField = new JTextField(20);
+        textField.setPreferredSize(new Dimension(120,20));
+        buttonPanel.add(textField);
+        JLabel filterLabel = new JLabel("Filter Thread Names");
+
+        JButton addThreadButton = new JButton("Add New Thread");
+        addThreadButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                td.createNewThread(textField.getText());
+                textField.setText("");
+            }
+        });
+
+        buttonPanel.add(addThreadButton);
+        buttonPanel.add(textFilter);
+        buttonPanel.add(filterLabel);
+        mainPanel.add(buttonPanel);
+        mainFrame.add(mainPanel);
+
+        JTable table;
 
         while(true) {
             table = refreshTable();
-
-            scrollPane = new JScrollPane(table);
+            JPanel tablePanel = new JPanel();
+            JScrollPane scrollPane = new JScrollPane(table);
             table.setFillsViewportHeight(true);
+            tablePanel.add(scrollPane);
+            mainPanel.add(tablePanel);
 
-            addThreadButton = new JButton("Add New Thread");
-            addThreadButton.addActionListener(new ActionListener() {
-                                            public void actionPerformed(ActionEvent e) {
-                                                Thread temp = new Thread("Dummy");
-                                                td.setThreadCount(td.getThreadCount()+1);
-                                                td.setThreadArray();
-                                                //td.getThreadArray()[td.getThreadCount()] = temp;
-                                                td.threadGroupEnumerate(td.getThreadArray());
-                                                refreshTable();
-                                            }
-                                        });
-            panel = new JPanel();
-            panel.add(addThreadButton);
-            panel.add(scrollPane);
-            frame.add(panel);
-            frame.pack();
-            frame.setVisible(true);
+            mainFrame.pack();
+            mainFrame.setVisible(true);
             Thread.sleep(500);
-            td.getAllThreadGroups();
-            td.threadGroupEnumerate(td.getThreadArray());
-            frame.remove(panel);
+            td.getThreads();
+            mainPanel.remove(tablePanel);
             scrollPane.remove(table);
         }
     }
 
     public JTable refreshTable(){
         String[] columnNames = {"Thread Name", "ID", "State", "Priority", "Daemon","ThreadGroup"};
-        JTable table = null;
-        table = new JTable(populateTable(),columnNames);
-        table.setSize(600,800);
-        return table;
+        JTable temp = new JTable(populateTable(),columnNames);
+        temp.setSize(600,800);
+        temp.getColumnModel().getColumn(0).setPreferredWidth(180);
+        System.out.println(td.getThreadArray().length);
+
+        if(!textFilter.getText().equals("")) {
+            isSearching = true;
+            TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(temp.getModel());
+            temp.setRowSorter(rowSorter);
+            textFilter.getDocument().addDocumentListener(new SearchFilter(textFilter, rowSorter));
+            temp = new JTable(populateTable(),columnNames);
+        }
+        return temp;
     }
 
     public Object[][] populateTable(){
-        Object data[][] = new Object[td.getThreadCount()][6];
-        for(int i=0; i < td.getThreadCount();i++){
-            data[i][0]=td.getThreadArray()[i].getName();
-            data[i][1]=td.getThreadArray()[i].getId();
-            data[i][2]=td.getThreadArray()[i].getState();
-            data[i][3]=td.getThreadArray()[i].getPriority();
-            data[i][4]=td.getThreadArray()[i].isDaemon();
-            data[i][5]=td.getThreadArray()[i].getThreadGroup();
+
+        Object data[][] = new Object[td.getThreadArray().length][6];
+        if(textFilter.getText().equals("")) {
+            for (int i = 0; i < td.getThreadArray().length; i++) {
+                data[i][0] = td.getThreadArray()[i].getName();
+                data[i][1] = td.getThreadArray()[i].getId();
+                data[i][2] = td.getThreadArray()[i].getState();
+                data[i][3] = td.getThreadArray()[i].getPriority();
+                data[i][4] = td.getThreadArray()[i].isDaemon();
+                data[i][5] = td.getThreadArray()[i].getThreadGroup();
+            }
+        }else if(isSearching){
+            for (int i = 0; i < td.getThreadArray().length; i++) {
+                if(td.getThreadArray()[i].getName().toLowerCase().equals(textFilter.getText().toLowerCase())) {
+                    data[i][0] = td.getThreadArray()[i].getName();
+                    data[i][1] = td.getThreadArray()[i].getId();
+                    data[i][2] = td.getThreadArray()[i].getState();
+                    data[i][3] = td.getThreadArray()[i].getPriority();
+                    data[i][4] = td.getThreadArray()[i].isDaemon();
+                    data[i][5] = td.getThreadArray()[i].getThreadGroup();
+                }
+            }
         }
         return data;
     }
-
 }
