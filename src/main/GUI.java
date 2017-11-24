@@ -1,10 +1,11 @@
 package main;
 
 //TODO
-// ADD THREAD
 // STOP THREADS
 // SEARCH THREADS (DYNAMICALLY)
 // LOOK AT THREAD GROUPS
+
+import drivers.TestDriveSeven;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +37,7 @@ public class GUI {
         JTextField textField = new JTextField(20);
         textField.setPreferredSize(new Dimension(50,20));
 
-        JButton searchButton = new JButton("Search for a thread");
+        JButton searchButton = new JButton("Search");
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 isSearch = true;
@@ -45,25 +46,43 @@ public class GUI {
 
         textFilter = new JTextField(20);
         textFilter.setPreferredSize(new Dimension(50,20));
-        searchPanel.add(searchButton);
         searchPanel.add(textFilter);
+        searchPanel.add(searchButton);
 
-        JButton addThreadButton = new JButton("Add New Thread");
+        JButton addThreadButton = new JButton("Start");
         addThreadButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                td.createNewThread(textField.getText());
-                textField.setText("");
+                if(!textField.getText().equals("")){
+                    td.createNewThread(textField.getText());
+                    textField.setText("");
+                }else{
+                    JOptionPane.showMessageDialog(null,"Sorry you cannot add a thread with no name!");
+                }
             }
         });
+
+        JButton stopThreadButton = new JButton("Stop");
+        stopThreadButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if(!textField.getText().equals("")){
+                    td.killThread(textField.getText());
+                    textField.setText("");
+                }else{
+                    JOptionPane.showMessageDialog(null,"Sorry you cannot stop a thread with no name!");
+                }
+            }
+        });
+
+        buttonPanel.add(textField);
+        buttonPanel.add(stopThreadButton);
         buttonPanel.add(addThreadButton);
-        buttonPanel.add(textField,BorderLayout.NORTH);
 
         mainFrame.add(mainPanel,BorderLayout.CENTER);
         mainFrame.add(buttonPanel,BorderLayout.NORTH);
         mainFrame.add(searchPanel,BorderLayout.SOUTH);
 
         while(true){
-
+            new TestDriveSeven();
             JPanel tempPanel = refresh();
             mainPanel.add(tempPanel, BorderLayout.SOUTH);
             mainFrame.setVisible(true);
@@ -71,7 +90,7 @@ public class GUI {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                JOptionPane.showMessageDialog(null,"Sorry you cannot interrupt this thread!");
             }
             td.getAllThreads();
             mainPanel.remove(tempPanel);

@@ -1,14 +1,15 @@
 package main;
 
-
 public class ThreadDriver {
 
     private Thread[] threads;
     private ThreadGroup rootGroup;
+    private ThreadGroup newThreads;
 
     public ThreadDriver(){
         getRootThreadGroup();
         getAllThreads();
+        newThreads = new ThreadGroup("Your Threads");
     }
 
 
@@ -30,18 +31,28 @@ public class ThreadDriver {
 
     public void createNewThread(String name){
 
-        Thread thread = new Thread(() ->
+        if(name.equals("")){
+            name = "Blank Thread";
+        }
+
+        Thread thread = new Thread(newThreads,() ->
         {
             try {
                 Thread.currentThread().sleep(60000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //Do nothing
             }
-
-
         }, name);
         thread.start();
         getAllThreads();
+    }
+
+    public void killThread(String name){
+        for (Thread t : getAllThreads()){
+            if(t.getName().toLowerCase().equals(name.toLowerCase())){
+                t.interrupt();
+            }
+        }
     }
 
 }
