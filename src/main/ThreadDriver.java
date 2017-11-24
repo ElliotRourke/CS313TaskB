@@ -9,6 +9,7 @@ public class ThreadDriver {
     public ThreadDriver(){
         getRootThreadGroup();
         getAllThreads();
+        createThreadGroups();
         newThreads = new ThreadGroup("Your Threads");
     }
 
@@ -28,6 +29,46 @@ public class ThreadDriver {
         rootGroup.enumerate(threads);
         return threads;
     }
+
+    public void createThreadGroups(){
+        ThreadGroup a = new ThreadGroup("A");
+        ThreadGroup b = new ThreadGroup("B");
+        ThreadGroup c = new ThreadGroup(a,"C");
+
+        Thread threada = new Thread(a,() ->
+        {
+            try {
+                Thread.currentThread().sleep(60000);
+            } catch (InterruptedException e) {
+                //Do nothing
+            }
+        }, "Thread A");
+        threada.start();
+
+        Thread threadb = new Thread(b,() ->
+        {
+            try {
+                Thread.currentThread().sleep(60000);
+            } catch (InterruptedException e) {
+                //Do nothing
+            }
+        }, "Thread B");
+        threadb.start();
+
+        Thread threadc = new Thread(c,() ->
+        {
+            try {
+                Thread.currentThread().sleep(60000);
+            } catch (InterruptedException e) {
+                //Do nothing
+            }
+        }, "Thread C");
+        threadc.start();
+
+
+        getAllThreads();
+    }
+
 
     public void createNewThread(String name){
 

@@ -18,6 +18,7 @@ public class GUI {
     private GuiTableController tableBuilder;
     private JTextField textFilter;
     private boolean isSearch = false;
+    private boolean isFilter = false;
 
     public GUI(ThreadDriver td){
         this.td = td;
@@ -40,7 +41,26 @@ public class GUI {
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                isSearch = true;
+                if(textFilter.getText().equals("")){
+                    JOptionPane.showMessageDialog(null,
+                            "Sorry you cannot search for a thread with no name!");
+                }else{
+                    isSearch = true;
+                }
+            }
+        });
+
+
+        JButton filterButton = new JButton("Filter");
+        filterButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                if(textFilter.getText().equals("")){
+                    JOptionPane.showMessageDialog(null,
+                            "Sorry you cannot filter a thread group with no name!");
+                }else{
+                    isFilter = true;
+                }
             }
         });
 
@@ -48,6 +68,7 @@ public class GUI {
         textFilter.setPreferredSize(new Dimension(50,20));
         searchPanel.add(textFilter);
         searchPanel.add(searchButton);
+        searchPanel.add(filterButton);
 
         JButton addThreadButton = new JButton("Start");
         addThreadButton.addActionListener(new ActionListener() {
@@ -56,7 +77,8 @@ public class GUI {
                     td.createNewThread(textField.getText());
                     textField.setText("");
                 }else{
-                    JOptionPane.showMessageDialog(null,"Sorry you cannot add a thread with no name!");
+                    JOptionPane.showMessageDialog(null,
+                            "Sorry you cannot add a thread with no name!");
                 }
             }
         });
@@ -68,7 +90,8 @@ public class GUI {
                     td.killThread(textField.getText());
                     textField.setText("");
                 }else{
-                    JOptionPane.showMessageDialog(null,"Sorry you cannot stop a thread with no name!");
+                    JOptionPane.showMessageDialog(null,
+                            "Sorry you cannot stop a thread with no name!");
                 }
             }
         });
@@ -82,6 +105,12 @@ public class GUI {
         mainFrame.add(searchPanel,BorderLayout.SOUTH);
 
         while(true){
+
+            if(textFilter.getText().equals("")){
+                isFilter = false;
+                isSearch = false;
+            }
+
             JPanel tempPanel = refresh();
             mainPanel.add(tempPanel, BorderLayout.SOUTH);
             mainFrame.setVisible(true);
@@ -89,7 +118,8 @@ public class GUI {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                JOptionPane.showMessageDialog(null,"Sorry you cannot interrupt this thread!");
+                JOptionPane.showMessageDialog(null,
+                        "Sorry you cannot interrupt this thread!");
             }
             td.getAllThreads();
             mainPanel.remove(tempPanel);
@@ -98,14 +128,22 @@ public class GUI {
 
     private JPanel refresh(){
         JPanel tablePanel = new JPanel();
-        JScrollPane scrollPane;
-        if(!isSearch || textFilter.getText().equals("")){
+        JScrollPane scrollPane = null;
+        if(!isSearch || ! isFilter || textFilter.getText().equals("")){
             new TestDriveSeven();
             scrollPane = new JScrollPane(new GuiTableController(td).buildTable());
-        }else{
+        }
+
+        if(isSearch){
             new TestDriveSeven();
             scrollPane = new JScrollPane(new GuiTableController(td).buildTable(textFilter.getText()));
         }
+
+        if(isFilter){
+            new TestDriveSeven();
+            scrollPane = new JScrollPane(new GuiTableController(td).buildFilterTable(textFilter.getText()));
+        }
+
         tablePanel.add(scrollPane);
         return tablePanel;
     }
